@@ -45,6 +45,6 @@ void printMatrix(bool matrix[ROWS][COLS]) {
 }
 
 void changeMatrix(bool matrix[ROWS][COLS]) {
-	matrix[0][2] = 1;
+	matrix[0][2] = true;
 }
 
