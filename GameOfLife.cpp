@@ -23,7 +23,7 @@ All other live cells die in the next generation. Similarly, all other dead cells
 
 
 void GameOfLife::updateState(int x, int y, bool b) {
-        this->currentState[x][y] = b;
+	this->currentState[x][y] = b;
 }
 
 void GameOfLife::updatePrevState(int x, int y, bool b) {
@@ -94,7 +94,45 @@ GameOfLife::GameOfLife() {
     }
 }
 
-int main() {
+void GameOfLife::customInitialization() {
+	updateState(1, 2, true);
+	updateState(2, 3, true);
+	updateState(3, 1, true);
+	updateState(3, 2, true);
+	updateState(3, 3, true);
+
+	updatePrevState(1, 2, true);
+	updatePrevState(2, 3, true);
+	updatePrevState(3, 1, true);
+	updatePrevState(3, 2, true);
+	updatePrevState(3, 3, true);
+
+}
+
+void GameOfLife::randomInitialization() {
+	int x = 1, y = 1;
+	std::random_device dev1;
+	std::mt19937 rng1(dev1());
+	std::random_device dev2;
+	std::mt19937 rng2(dev2());
+	std::uniform_int_distribution<std::mt19937::result_type> distrow(0, ROWS-1);
+	std::uniform_int_distribution<std::mt19937::result_type> distcol(0, COLS-1);
+	for (int i = 0; i < 20; i++) {
+		//x = static_cast<int>(distrow(rng1));
+		//y = static_cast<int>(distcol(rng2));
+		// biggest mystery to be solved
+		updateState(x, y, true);
+	}
+	for (int i = 0; i < ROWS; i++) { //copy to the previous state
+		for (int j = 0; j < COLS; j++) {
+			updatePrevState(i, j, isAlive(i, j));
+
+		}
+	}
+
+}
+
+void GameOfLife::compute() {
     GameOfLife game;
 
     /**
@@ -109,26 +147,8 @@ int main() {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
      */
-
-    int x , y;
-    std::random_device dev1;
-    std::mt19937 rng1(dev1());
-    std::random_device dev2;
-    std::mt19937 rng2(dev2());
-    std::uniform_int_distribution<std::mt19937::result_type> distrow(0, ROWS-1);
-    std::uniform_int_distribution<std::mt19937::result_type> distcol(0, COLS-1);
-    for (int i = 0; i < 20; i++) {
-        x = static_cast<int>(distrow(rng1));
-        y = static_cast<int>(distcol(rng2));
-        game.updateState(x, y, true);
-    }
-    for (int i = 0; i < ROWS; i++) { //copy to the previous state
-        for (int j = 0; j < COLS; j++) {
-            game.updatePrevState(i, j, game.isAlive(i, j));
-
-        }
-    }
-    game.showState();
+	game.randomInitialization();
+	game.showState();
 
 
     for (int t = 0; t < 10; t++) {

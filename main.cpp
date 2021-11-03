@@ -1,7 +1,15 @@
 #include <iostream>
+#include "GameOfLife.h"
 
 using namespace std;
 
+int main() {
+	GameOfLife::compute();
+	return 0;
+}
+
+
+/*
 #define ROWS 10
 #define COLS 10
 
@@ -22,7 +30,7 @@ int main() {
 	printMatrix(state);
 
 
-	/* dynamic allocation of a matrix in the heap
+	// dynamic allocation of a matrix in the heap
 	bool (*matrix2)[10] = new bool [10][10];
 
 	//array of arrays approach  -- slower in time and heavier in space
@@ -30,7 +38,7 @@ int main() {
 	for (int i = 0; i < 10; ++i) {
 		matrix3[i] = new bool[10];
 	}
-	 */
+
 
     return 0;
 }
@@ -47,4 +55,5 @@ void printMatrix(bool matrix[ROWS][COLS]) {
 void changeMatrix(bool matrix[ROWS][COLS]) {
 	matrix[0][2] = true;
 }
+*/
 
