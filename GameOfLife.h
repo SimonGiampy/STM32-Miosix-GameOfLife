@@ -22,6 +22,8 @@ public:
 	static void compute();
 	void customInitialization();
 	void randomInitialization();
+
+	void clearScreen();
 };
 
 

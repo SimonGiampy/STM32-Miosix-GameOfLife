@@ -1,5 +1,7 @@
 #include "GameOfLife.h"
 #include <iostream>
+#include <chrono>
+#include <thread>
 #include <random>
 
 using namespace std;
@@ -27,71 +29,73 @@ void GameOfLife::updateState(int x, int y, bool b) {
 }
 
 void GameOfLife::updatePrevState(int x, int y, bool b) {
-    this->prevState[x][y] = b;
+	this->prevState[x][y] = b;
 }
 
 bool GameOfLife::wasAlive(int x, int y) {
-    return this->prevState[x][y];
+	return this->prevState[x][y];
 }
 bool GameOfLife::isAlive(int x, int y) {
-    return this->currentState[x][y];
+	return this->currentState[x][y];
 }
 
 void GameOfLife::showState() {
-    for (int i = 0; i < ROWS; i++) { //testing
-        for (int j = 0; j < COLS; j++) {
-            cout << this->currentState[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
+	for (int i = 0; i < ROWS; i++) { //testing
+		for (int j = 0; j < COLS; j++) {
+			cout << this->currentState[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	cout << "\033[H\033[J"; //clear terminal
 }
 
 
 int GameOfLife::liveNeighbours(int x, int y) {
 
-    int count = 0;
-    int startX, startY, endX, endY;
+	int count = 0;
+	int startX, startY, endX, endY;
 
-    if (x == 0) {
-        startX = 0;
-        endX = x+1;
-    } else if (x == ROWS-1) {
-        startX = x-1;
-        endX = ROWS - 1;
-    } else {
-        startX = x-1;
-        endX = x+1;
-    }
+	if (x == 0) {
+		startX = 0;
+		endX = x+1;
+	} else if (x == ROWS-1) {
+		startX = x-1;
+		endX = ROWS - 1;
+	} else {
+		startX = x-1;
+		endX = x+1;
+	}
 
-    if (y == 0) {
-        startY = 0;
-        endY = y+1;
-    } else if (y == COLS-1) {
-        startY = y-1;
-        endY = COLS - 1;
-    } else {
-        startY = y-1;
-        endY = y+1;
-    }
+	if (y == 0) {
+		startY = 0;
+		endY = y+1;
+	} else if (y == COLS-1) {
+		startY = y-1;
+		endY = COLS - 1;
+	} else {
+		startY = y-1;
+		endY = y+1;
+	}
 
-    for (int coordX = startX; coordX <= endX; coordX++) {
-        for (int coordY = startY; coordY <= endY; coordY++) {
-            if (coordX != x || coordY != y) {
-                count += (int) wasAlive(coordX, coordY);
-            }
-        }
-    }
-    return count;
+	for (int coordX = startX; coordX <= endX; coordX++) {
+		for (int coordY = startY; coordY <= endY; coordY++) {
+			if (coordX != x || coordY != y) {
+				count += (int) wasAlive(coordX, coordY);
+			}
+		}
+	}
+	return count;
 }
 
 GameOfLife::GameOfLife() {
-    for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLS; j++) {
-            currentState[i][j] = false;
-            prevState[i][j] = false;
-        }
-    }
+	for (int i = 0; i < ROWS; i++) {
+		for (int j = 0; j < COLS; j++) {
+			currentState[i][j] = false;
+			prevState[i][j] = false;
+		}
+	}
 }
 
 void GameOfLife::customInitialization() {
@@ -120,7 +124,6 @@ void GameOfLife::randomInitialization() {
 	for (int i = 0; i < 20; i++) {
 		//x = static_cast<int>(distrow(rng1));
 		//y = static_cast<int>(distcol(rng2));
-		// biggest mystery to be solved
 		updateState(x, y, true);
 	}
 	for (int i = 0; i < ROWS; i++) { //copy to the previous state
@@ -133,50 +136,44 @@ void GameOfLife::randomInitialization() {
 }
 
 void GameOfLife::compute() {
-    GameOfLife game;
+	GameOfLife game;
 
-    /**
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-0, 0, 1, 0, 0, 0, 0, 0, 0, 0
-0, 0, 0, 1, 0, 0, 0, 0, 0, 0
-0, 1, 1, 1, 0, 0, 0, 0, 0, 0
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-     */
-	game.randomInitialization();
+	game.customInitialization();
 	game.showState();
 
 
-    for (int t = 0; t < 10; t++) {
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                if (game.wasAlive(row, col) &&
-                    !(game.liveNeighbours(row, col) == 2 || game.liveNeighbours(row, col) == 3)) {
-                    game.updateState(row, col, false);
+	for (int t = 0; t < 10; t++) {
+		for (int row = 0; row < ROWS; row++) {
+			for (int col = 0; col < COLS; col++) {
+				if (game.wasAlive(row, col) &&
+					!(game.liveNeighbours(row, col) == 2 || game.liveNeighbours(row, col) == 3)) {
+					game.updateState(row, col, false);
 
-                } else if (!game.wasAlive(row, col) && game.liveNeighbours(row, col) == 3) {
-                    game.updateState(row, col, true);
-                }
+				} else if (!game.wasAlive(row, col) && game.liveNeighbours(row, col) == 3) {
+					game.updateState(row, col, true);
+				}
 
-            }
-        }
+			}
+		}
 
-        game.showState();
+		game.showState();
 
-        for (int i = 0; i < ROWS; i++) { //copy to the previous state
-            for (int j = 0; j < COLS; j++) {
-                game.updatePrevState(i, j, game.isAlive(i, j));
-            }
-        }
-    }
+		for (int i = 0; i < ROWS; i++) { //copy to the previous state
+			for (int j = 0; j < COLS; j++) {
+				game.updatePrevState(i, j, game.isAlive(i, j));
+			}
+		}
+
+
+	}
+	cout << "\033[<3>A";
+	string input;
+	cin >> input;
 
 }
 
-
-
+void GameOfLife::clearScreen() {
+	//cout << "\033[H\033[J"; //clear terminal
+}
 
 

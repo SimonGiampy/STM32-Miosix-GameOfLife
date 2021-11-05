@@ -3,10 +3,38 @@
 
 using namespace std;
 
+void moveCursor(std::ostream& os, int col, int row);
+
 int main() {
-	GameOfLife::compute();
+	//GameOfLife::compute();
+
+
+	//before executing this code clear the terminal
+	//these are absolute coordinates, starting from the lft-upper corner
+
+	cout << "0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 1, 0, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 0, 1, 0, 0, 0, 0, 0, 0\n"
+			"0, 1, 1, 1, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n"
+			"0, 0, 0, 0, 0, 0, 0, 0, 0, 0";
+	moveCursor(std::cout, 20,20);
+	std::cout << "writing in posizione 20,20";
+	moveCursor(std::cout, 50,60);
+	std::cout << "writing in posizione 50,60" << std::endl;
+
 	return 0;
 }
+
+
+void moveCursor(std::ostream& os, int col, int row) {
+	os << "\033[" << col << ";" << row << "H";
+}
+
 
 
 /*
