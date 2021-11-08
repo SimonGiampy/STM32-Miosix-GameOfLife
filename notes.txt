@@ -1,0 +1,34 @@
+
+Input peripherals:
+
+- analyzing mouse input requires the library linux/input.h, which apparently it is not included under the miosix kernel
+-       it can be achieved on the standard linux terminal by using the script base_input_handler and following
+        the provided instructions at the start of the file.
+-
+- analyzing the keyboard input can be done with the termios library, by using the provided code in the base_input_handler file
+
+
+Programs Structure:
+
+-   base_input_handler.cpp contains the default implementation of the user input handler, provided on stack overflow, written in C
+-   input_handler.cpp is a C++ implementation of the same default file provided on stackoverflow
+-   my_input.cpp is a custom keyboard-only user input handler source file, that can be executed via the starter.cpp source file.
+            it does not use the poll.h file, nor the input.h file. Handles user input without polling but directly reading the stdin
+
+
+
+sys/poll.h
+contains the following data structure used for recording events derived from external peripherals
+
+struct pollfd {
+    int fd;			/* File descriptor to poll.  */
+    short int events;		/* Types of events poller cares about.  */
+    short int revents;		/* Types of events that actually occurred.  */
+};
+
+
+linux/input.h
+provides basic functionality for analyzing the mouse input, although it is not currently possible to find the exact
+coordinates where the user clicked on the screen. Neither it is possible to know if the click occurred inside the terminal
+
+
