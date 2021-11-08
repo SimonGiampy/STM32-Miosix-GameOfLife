@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(STM32_Miosix_GameOfLife)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 include_directories(.)
 
 add_executable(STM32_Miosix_GameOfLife
-        main.cpp GameOfLife.cpp GameOfLife.h)
+        my_input.cpp my_input.h)
