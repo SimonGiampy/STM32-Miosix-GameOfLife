@@ -122,8 +122,8 @@ void GameOfLife::randomInitialization() {
 	std::uniform_int_distribution<std::mt19937::result_type> distrow(0, ROWS-1);
 	std::uniform_int_distribution<std::mt19937::result_type> distcol(0, COLS-1);
 	for (int i = 0; i < 20; i++) {
-		//x = static_cast<int>(distrow(rng1));
-		//y = static_cast<int>(distcol(rng2));
+		x = static_cast<int>(distrow(rng1));
+		y = static_cast<int>(distcol(rng2));
 		updateState(x, y, true);
 	}
 	for (int i = 0; i < ROWS; i++) { //copy to the previous state
