@@ -7,10 +7,10 @@
 using namespace std;
 
 /**
- * The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells,
- * each of which is in one of two possible states, live or dead, (or populated and unpopulated, respectively).
- * Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically,
- * or diagonally adjacent. At each step in time, the following transitions occur:
+The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells,
+each of which is in one of two possible states, live or dead, (or populated and unpopulated, respectively).
+Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically,
+or diagonally adjacent. At each step in time, the following transitions occur:
 
 Any live cell with fewer than two live neighbours dies, as if by underpopulation.
 Any live cell with two or three live neighbours lives on to the next generation.
@@ -24,14 +24,6 @@ All other live cells die in the next generation. Similarly, all other dead cells
  */
 
 
-void GameOfLife::updateState(int x, int y, bool b) {
-	this->currentState[x][y] = b;
-}
-
-void GameOfLife::updatePrevState(int x, int y, bool b) {
-	this->prevState[x][y] = b;
-}
-
 bool GameOfLife::wasAlive(int x, int y) {
 	return this->prevState[x][y];
 }
@@ -39,19 +31,33 @@ bool GameOfLife::isAlive(int x, int y) {
 	return this->currentState[x][y];
 }
 
+/**
+ * prints the matrix state
+ */
 void GameOfLife::showState() {
-	for (int i = 0; i < ROWS; i++) { //testing
-		for (int j = 0; j < COLS; j++) {
-			cout << this->currentState[i][j] << " ";
+	for (int i = 0; i < ROWS * 2 + 1; i++) {
+		for (int j = 0; j < COLS * 3 + 1; j++) {
+
+			if (j % 2 == 0) cout << "-"; // horizontal separator
+			else if (i == 0 || (i+1) % 3 == 0) cout << "|"; // vertical separator
+			else if (this->currentState[i][j]) cout << "X"; // living cell mark
+			else cout << " "; // dead cell mark
+
+			//cout << this->currentState[i][j] << " ";
 		}
 		cout << endl;
 	}
-	cout << endl;
+	cout << endl << endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	cout << "\033[H\033[J"; //clear terminal
+	clearScreen();
 }
 
-
+/**
+ * returns the number of live neighbours present around a cell at the given coordinates
+ * @param x coordinate of the selected cell
+ * @param y coordinate of the selected cell
+ * @return number of living neighbours (max = 8)
+ */
 int GameOfLife::liveNeighbours(int x, int y) {
 
 	int count = 0;
@@ -98,18 +104,22 @@ GameOfLife::GameOfLife() {
 	}
 }
 
+/**
+ * example: initialization valid for a matrix bigger than 4 columns and 4 rows
+ * it shows a classic glider starting from the left upper corner
+ */
 void GameOfLife::customInitialization() {
-	updateState(1, 2, true);
-	updateState(2, 3, true);
-	updateState(3, 1, true);
-	updateState(3, 2, true);
-	updateState(3, 3, true);
+	this->currentState[1][2] = true;
+	this->currentState[2][3] = true;
+	this->currentState[3][1] = true;
+	this->currentState[3][2] = true;
+	this->currentState[3][3] = true;
 
-	updatePrevState(1, 2, true);
-	updatePrevState(2, 3, true);
-	updatePrevState(3, 1, true);
-	updatePrevState(3, 2, true);
-	updatePrevState(3, 3, true);
+	this->prevState[1][2] = true;
+	this->prevState[2][3] = true;
+	this->prevState[3][1] = true;
+	this->prevState[3][2] = true;
+	this->prevState[3][3] = true;
 
 }
 
@@ -121,59 +131,59 @@ void GameOfLife::randomInitialization() {
 	std::mt19937 rng2(dev2());
 	std::uniform_int_distribution<std::mt19937::result_type> distrow(0, ROWS-1);
 	std::uniform_int_distribution<std::mt19937::result_type> distcol(0, COLS-1);
-	for (int i = 0; i < 20; i++) {
+
+	// 20% of the cells are initialized as living cells
+	for (int i = 0; i < ROWS * COLS * 0.2; i++) {
+		//these 2 lines create a strange problem when running on miosix
 		x = static_cast<int>(distrow(rng1));
 		y = static_cast<int>(distcol(rng2));
-		updateState(x, y, true);
+		this->currentState[x][y] = true;
 	}
+
 	for (int i = 0; i < ROWS; i++) { //copy to the previous state
 		for (int j = 0; j < COLS; j++) {
-			updatePrevState(i, j, isAlive(i, j));
-
+			this->prevState[i][j] = isAlive(i, j);
 		}
 	}
 
 }
 
 void GameOfLife::compute() {
-	GameOfLife game;
-
-	game.customInitialization();
-	game.showState();
+	customInitialization();
+	showState();
 
 
 	for (int t = 0; t < 10; t++) {
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < COLS; col++) {
-				if (game.wasAlive(row, col) &&
-					!(game.liveNeighbours(row, col) == 2 || game.liveNeighbours(row, col) == 3)) {
-					game.updateState(row, col, false);
-
-				} else if (!game.wasAlive(row, col) && game.liveNeighbours(row, col) == 3) {
-					game.updateState(row, col, true);
+				if (wasAlive(row, col) &&
+					!(liveNeighbours(row, col) == 2 || liveNeighbours(row, col) == 3)) {
+					this->currentState[row][col] = false;
+				} else if (!wasAlive(row, col) && liveNeighbours(row, col) == 3) {
+					this->currentState[row][col] = true;
 				}
 
 			}
 		}
 
-		game.showState();
+		showState();
 
 		for (int i = 0; i < ROWS; i++) { //copy to the previous state
 			for (int j = 0; j < COLS; j++) {
-				game.updatePrevState(i, j, game.isAlive(i, j));
+				this->prevState[i][j] = isAlive(i, j);
 			}
 		}
 
 
 	}
-	cout << "\033[<3>A";
-	string input;
-	cin >> input;
 
 }
 
+/**
+ * clears terminal window
+ */
 void GameOfLife::clearScreen() {
-	//cout << "\033[H\033[J"; //clear terminal
+	cout << "\033[H\033[J";
 }
 
 

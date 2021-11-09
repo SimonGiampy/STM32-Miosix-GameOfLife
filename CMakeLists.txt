@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(.)
 
 add_executable(STM32_Miosix_GameOfLife
-        my_input.cpp my_input.h)
+       starter.cpp my_input.cpp)

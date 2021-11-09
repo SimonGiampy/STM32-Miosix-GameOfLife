@@ -32,3 +32,22 @@ provides basic functionality for analyzing the mouse input, although it is not c
 coordinates where the user clicked on the screen. Neither it is possible to know if the click occurred inside the terminal
 
 
+
+New mail to send to the professor:
+
+Colgo l'occasione per chiederle una serie di cose riguardo Miosix e il progetto:
+sono riuscito a programmare correttamente un programma che elabora l'input utente carattere per carattere. Ma non sono
+riuscito a elaborare l'input del mouse su miosix (invece sul terminale di Linux sul pc si). Questo perchè mi servono due librerie
+che il compilatore non riconosce su miosix, ovvero sys/poll.h e linux/input.h. Il problema vero però è che se anche riuscissi a far
+ funzionare la ricezione del click del mouse, non saprei come ottenere le coordinate esatte di dove è avvenuto il click,
+ rispettivamente al terminale, in modo tale che così l'utente può selezionare le celle da rendere "vive".
+Mi chiedo quindi se c'è qualche strada per farlo con o senza l'uso delle librerie che ho citato.
+Alternativamente, farei il progetto sfruttando solo la tastiera (quindi input tramite frecce direzionali e qualche altro tasto).
+
+
+problemi:
+- mouse input not working on miosix because 2 libraries are not implemented
+- diagonal print on miosix (probably changing some termios flags will make it work)
+- what are the available libraries??
+
+

@@ -13,13 +13,12 @@ private:
     bool prevState[ROWS][COLS];
 public:
     GameOfLife();
-    void updateState(int x, int y, bool b);
     int liveNeighbours(int x, int y);
     bool wasAlive (int x, int y);
     bool isAlive (int x, int y);
-    void updatePrevState(int x, int y, bool b);
     void showState();
-	static void compute();
+	void compute();
+
 	void customInitialization();
 	void randomInitialization();
 
