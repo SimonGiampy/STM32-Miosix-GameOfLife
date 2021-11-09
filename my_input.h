@@ -7,7 +7,8 @@
 #include <fcntl.h>
 //#include <linux/input.h>
 #include <termios.h>
-#include <poll.h>
+//#include <poll.h>
+#include <sys/ioctl.h>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -27,8 +28,15 @@ public:
 	int src;
 	ssize_t             srcs, i, n;
 	int                 arg, nsrcs;
+	int currentX = 0, currentY = 0;
 
 	int handle();
+	void basicPrint();
+	int freeMover();
+	void clearScreen();
+	void moveCursor(int x, int y);
+	void getCurrentPosition(int *x, int *y);
+	static void printTerminalSize();
 };
 
 
