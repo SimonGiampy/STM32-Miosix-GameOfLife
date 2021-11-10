@@ -1,8 +1,4 @@
 #include "GameOfLife.h"
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include <random>
 
 using namespace std;
 
@@ -23,33 +19,74 @@ Any dead cell with three live neighbours becomes a live cell.
 All other live cells die in the next generation. Similarly, all other dead cells stay dead.
  */
 
+GameOfLife::GameOfLife(int rows, int cols) {
+	this->rows = rows;
+	this->cols = cols;
+
+	currentState = new bool*[rows]; // array of pointers to the rows of the equivalent matrix
+	currentState[0] = new bool[rows * cols]; //pointer to an array containing all the matrix elements
+
+	previousState = new bool*[rows]; // array of pointers to the rows of the equivalent matrix
+	previousState[0] = new bool[rows * cols]; //pointer to an array containing all the matrix elements
+
+	for (int i = 1; i < rows; i++) {
+		currentState[i] = currentState[0] + i * cols;
+		previousState[i] = previousState[0] + i * cols;
+	}
+
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			*(currentState[i] + j) = false;
+			*(previousState[i] + j) = false;
+		}
+	}
+}
+
+/**
+ * destructor deallocates the dynamically allocated matrix of the game representation
+ */
+GameOfLife::~GameOfLife() {
+	delete[] currentState[0];
+	delete[] currentState;
+	delete[] previousState[0];
+	delete[] previousState;
+}
+
 
 bool GameOfLife::wasAlive(int x, int y) {
-	return this->prevState[x][y];
+	return this->previousState[x][y];
 }
 bool GameOfLife::isAlive(int x, int y) {
 	return this->currentState[x][y];
+}
+
+void GameOfLife::changeCellState(int x, int y) {
+	currentState[y/2][x/3] = !currentState[y/2][x/3];
+	clearScreen();
+	showState();
 }
 
 /**
  * prints the matrix state
  */
 void GameOfLife::showState() {
-	for (int i = 0; i < ROWS * 2 + 1; i++) {
-		for (int j = 0; j < COLS * 3 + 1; j++) {
 
-			if (j % 2 == 0) cout << "-"; // horizontal separator
-			else if (i == 0 || (i+1) % 3 == 0) cout << "|"; // vertical separator
-			else if (this->currentState[i][j]) cout << "X"; // living cell mark
-			else cout << " "; // dead cell mark
+	for (int j = -1; j < rows * 2; j++) {
+		for (int i = -1; i < cols * 3; i++) {
 
-			//cout << this->currentState[i][j] << " ";
+			if (j == -1 || j % 2 == 1) {
+				cout << "-";
+			} else {
+				if (i == -1 || i % 3 == 2) cout << "|";
+				else if (this->currentState[j/2][i/3]) cout << "X";
+				else cout << " ";
+			}
 		}
 		cout << endl;
 	}
+
 	cout << endl << endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	clearScreen();
 }
 
 /**
@@ -66,9 +103,9 @@ int GameOfLife::liveNeighbours(int x, int y) {
 	if (x == 0) {
 		startX = 0;
 		endX = x+1;
-	} else if (x == ROWS-1) {
+	} else if (x == rows-1) {
 		startX = x-1;
-		endX = ROWS - 1;
+		endX = rows - 1;
 	} else {
 		startX = x-1;
 		endX = x+1;
@@ -77,9 +114,9 @@ int GameOfLife::liveNeighbours(int x, int y) {
 	if (y == 0) {
 		startY = 0;
 		endY = y+1;
-	} else if (y == COLS-1) {
+	} else if (y == cols-1) {
 		startY = y-1;
-		endY = COLS - 1;
+		endY = cols - 1;
 	} else {
 		startY = y-1;
 		endY = y+1;
@@ -95,31 +132,22 @@ int GameOfLife::liveNeighbours(int x, int y) {
 	return count;
 }
 
-GameOfLife::GameOfLife() {
-	for (int i = 0; i < ROWS; i++) {
-		for (int j = 0; j < COLS; j++) {
-			currentState[i][j] = false;
-			prevState[i][j] = false;
-		}
-	}
-}
-
 /**
  * example: initialization valid for a matrix bigger than 4 columns and 4 rows
  * it shows a classic glider starting from the left upper corner
  */
-void GameOfLife::customInitialization() {
-	this->currentState[1][2] = true;
-	this->currentState[2][3] = true;
-	this->currentState[3][1] = true;
-	this->currentState[3][2] = true;
-	this->currentState[3][3] = true;
+void GameOfLife::spawnGlider(int x, int y) {
+	this->currentState[x][y+1] = true;
+	this->currentState[x+1][y+2] = true;
+	this->currentState[x+2][y] = true;
+	this->currentState[x+2][y+1] = true;
+	this->currentState[x+2][y+2] = true;
 
-	this->prevState[1][2] = true;
-	this->prevState[2][3] = true;
-	this->prevState[3][1] = true;
-	this->prevState[3][2] = true;
-	this->prevState[3][3] = true;
+	this->previousState[x][y+1] = true;
+	this->previousState[x+1][y+2] = true;
+	this->previousState[x+2][y] = true;
+	this->previousState[x+2][y+1] = true;
+	this->previousState[x+2][y+2] = true;
 
 }
 
@@ -129,35 +157,36 @@ void GameOfLife::randomInitialization() {
 	std::mt19937 rng1(dev1());
 	std::random_device dev2;
 	std::mt19937 rng2(dev2());
-	std::uniform_int_distribution<std::mt19937::result_type> distrow(0, ROWS-1);
-	std::uniform_int_distribution<std::mt19937::result_type> distcol(0, COLS-1);
+	std::uniform_int_distribution<std::mt19937::result_type> distrow(0, rows-1);
+	std::uniform_int_distribution<std::mt19937::result_type> distcol(0, cols-1);
 
 	// 20% of the cells are initialized as living cells
-	for (int i = 0; i < ROWS * COLS * 0.2; i++) {
+	for (int i = 0; i < rows * cols * 0.2; i++) {
 		//these 2 lines create a strange problem when running on miosix
 		x = static_cast<int>(distrow(rng1));
 		y = static_cast<int>(distcol(rng2));
 		this->currentState[x][y] = true;
 	}
 
-	for (int i = 0; i < ROWS; i++) { //copy to the previous state
-		for (int j = 0; j < COLS; j++) {
-			this->prevState[i][j] = isAlive(i, j);
+	for (int i = 0; i < rows; i++) { //copy to the previous state
+		for (int j = 0; j < cols; j++) {
+			this->previousState[i][j] = isAlive(i, j);
 		}
 	}
 
 }
 
 void GameOfLife::compute() {
-	customInitialization();
+
+	//spawnGlider(1, 1);
+	//clearScreen();
+
 	showState();
-
-
+	clearScreen();
 	for (int t = 0; t < 10; t++) {
-		for (int row = 0; row < ROWS; row++) {
-			for (int col = 0; col < COLS; col++) {
-				if (wasAlive(row, col) &&
-					!(liveNeighbours(row, col) == 2 || liveNeighbours(row, col) == 3)) {
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < cols; col++) {
+				if (wasAlive(row, col) && !(liveNeighbours(row, col) == 2 || liveNeighbours(row, col) == 3)) {
 					this->currentState[row][col] = false;
 				} else if (!wasAlive(row, col) && liveNeighbours(row, col) == 3) {
 					this->currentState[row][col] = true;
@@ -167,14 +196,15 @@ void GameOfLife::compute() {
 		}
 
 		showState();
-
-		for (int i = 0; i < ROWS; i++) { //copy to the previous state
-			for (int j = 0; j < COLS; j++) {
-				this->prevState[i][j] = isAlive(i, j);
-			}
+		if (t < 9) {
+			clearScreen();
 		}
 
-
+		for (int i = 0; i < rows; i++) { //copy to the previous state
+			for (int j = 0; j < cols; j++) {
+				this->previousState[i][j] = isAlive(i, j);
+			}
+		}
 	}
 
 }

@@ -2,27 +2,19 @@
 // Created by simon on 08/11/21.
 //
 
-#include "my_input.h"
+#include "MyInput.h"
 #include "GameOfLife.h"
 
 void startGOF();
 
-int main(int argc, char *argv[]) {
-	my_input input;
-
-	//return input.handle();
-
-	//input.basicPrint();
-	//return 0;
-
-	//return input.freeMover();
-
-	startGOF();
+int main(int argc, char *argv[]) { // input arguments needed only when handling mouse clicks as inputs
+	MyInput input;
+	input.initialConfiguration();
 	return 0;
 }
 
 void startGOF() {
-	GameOfLife gof;
+	GameOfLife gof(10, 10);
 	gof.compute();
 }
 
