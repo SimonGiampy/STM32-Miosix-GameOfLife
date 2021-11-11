@@ -30,7 +30,7 @@ public:
 	void spawnGlider(int x, int y);
 	void randomInitialization();
 
-	void clearScreen();
+	static void clearScreen();
 };
 
 

@@ -23,17 +23,16 @@ private:
 	unsigned char keys[16]{};
 	struct termios config{}, oldConfig{}; //terminal configurations
 	int fd = 0; // terminal file descriptor
-	ssize_t i = 0, n = 0; //, srcs
-	int currentX = 0, currentY = 0; // cursor coordinates
+	int cursorX = 1, cursorY = 1; // cursor coordinates
+	int width = 0, height = 0; // terminal size
 
 public:
 
 	static void clearScreen();
 	void moveCursor(int x, int y);
-	void updateCurrentPosition();
-	static void printTerminalSize();
+	void setCursorPosition(int x, int y);
+	void getTerminalSize();
 
-	int inputTest();
 	int setUpTerminal();
 	void resetTerminal();
 	char userInput();

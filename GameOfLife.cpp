@@ -85,8 +85,7 @@ void GameOfLife::showState() {
 		cout << endl;
 	}
 
-	cout << endl << endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	cout << endl;
 }
 
 /**
@@ -182,6 +181,7 @@ void GameOfLife::compute() {
 	//clearScreen();
 
 	showState();
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	clearScreen();
 	for (int t = 0; t < 10; t++) {
 		for (int row = 0; row < rows; row++) {
@@ -196,6 +196,7 @@ void GameOfLife::compute() {
 		}
 
 		showState();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		if (t < 9) {
 			clearScreen();
 		}

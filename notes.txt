@@ -38,19 +38,3 @@ coordinates where the user clicked on the screen. Neither it is possible to know
 
 
 
-New mail to send to the professor:
-
-Per quanto riguarda la dimensione del terminale, lei mi aveva detto che è possibile ottenerla direttamente tramite codice,
-ma non penso sia possibile farlo (o comunque mi sfugge come farlo). Sono riuscito a ottenere la dimensione corretta su linux
-in due modi diversi (di cui uno non sfrutta la libreria ioctl.h che non è presente all'interno di miosix). Solo che il
-micro controllore ritorna un risultato errato. Questo perchè miosix non è in grado di eseguire codice su un'altra macchina
-e ottenerne il risultato tramite seriale, e non può eseguire quel codice al suo interno perchè il terminale è una interfaccia
-presente sul computer esterno che viene usato solo come "schermo". Cosa faccio quindi? Chiedo la dimensione della matrice
-come input utente prima dell'inizio dell'esecuzione del codice?
-
-problemi:
-- mouse input not working on miosix because 2 libraries are not implemented
-- diagonal print on miosix --> carriage return is not set
-- terminal size cannot be retrieved correctly from miosix in any way
-
-
