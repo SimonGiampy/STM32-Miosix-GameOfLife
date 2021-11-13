@@ -1,7 +1,5 @@
 #include "GameOfLife.h"
 
-using namespace std;
-
 /**
 The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells,
 each of which is in one of two possible states, live or dead, (or populated and unpopulated, respectively).
@@ -67,25 +65,26 @@ void GameOfLife::changeCellState(int x, int y) {
 }
 
 /**
- * prints the matrix state
+ * prints the matrix state, by building up a single string
  */
 void GameOfLife::showState() {
-
+	std::string matrix;
 	for (int j = -1; j < rows * 2; j++) {
 		for (int i = -1; i < cols * 3; i++) {
 
 			if (j == -1 || j % 2 == 1) {
-				cout << "-";
+				matrix.append("-");
 			} else {
-				if (i == -1 || i % 3 == 2) cout << "|";
-				else if (this->currentState[j/2][i/3]) cout << "X";
-				else cout << " ";
+				if (i == -1 || i % 3 == 2) matrix.append("|");
+				else if (this->currentState[j/2][i/3]) matrix.append(living);
+				else matrix.append(" ");
 			}
 		}
-		cout << endl;
+		matrix.append("\n\r");
 	}
 
-	cout << endl;
+	std::cout << matrix;
+	std::cout.flush();
 }
 
 /**
@@ -132,26 +131,50 @@ int GameOfLife::liveNeighbours(int x, int y) {
 }
 
 /**
- * example: initialization valid for a matrix bigger than 4 columns and 4 rows
- * it shows a classic glider starting from the left upper corner
+ * puts a glider on the matrix a classic glider starting from the left upper corner
+ * @param x coordinate of the column of the cursor position
+ * @param y coordinate of the row of the cursor position
  */
 void GameOfLife::spawnGlider(int x, int y) {
+	int temp = x;
+	x = y/2;
+	y = temp/3;
+
 	this->currentState[x][y+1] = true;
 	this->currentState[x+1][y+2] = true;
 	this->currentState[x+2][y] = true;
 	this->currentState[x+2][y+1] = true;
 	this->currentState[x+2][y+2] = true;
 
-	this->previousState[x][y+1] = true;
-	this->previousState[x+1][y+2] = true;
-	this->previousState[x+2][y] = true;
-	this->previousState[x+2][y+1] = true;
-	this->previousState[x+2][y+2] = true;
-
+	clearScreen();
+	showState();
 }
 
+void GameOfLife::spawnSpaceship(int x, int y) {
+	int temp = x;
+	x = y/2;
+	y = temp/3;
+
+	this->currentState[x][y] = true;
+	this->currentState[x+2][y] = true;
+	this->currentState[x+3][y+1] = true;
+	this->currentState[x+3][y+2] = true;
+	this->currentState[x+3][y+3] = true;
+	this->currentState[x+3][y+4] = true;
+	this->currentState[x+2][y+4] = true;
+	this->currentState[x+1][y+4] = true;
+	this->currentState[x][y+3] = true;
+
+	clearScreen();
+	showState();
+}
+
+/**
+ * it only works on linux, this random function is not present on miosix.
+ * use this function for testing purpose only
+ */
 void GameOfLife::randomInitialization() {
-	int x = 1, y = 1;
+	int x, y;
 	std::random_device dev1;
 	std::mt19937 rng1(dev1());
 	std::random_device dev2;
@@ -176,14 +199,17 @@ void GameOfLife::randomInitialization() {
 }
 
 void GameOfLife::compute() {
-
-	//spawnGlider(1, 1);
-	//clearScreen();
-
-	showState();
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	clearScreen();
-	for (int t = 0; t < 10; t++) {
+
+	// initialization of the previous state matrix to be equal the previous one
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			this->previousState[i][j] = isAlive(i, j);
+		}
+	}
+
+	bool still = false;
+	for (int t = 0; !still; t++) {
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < cols; col++) {
 				if (wasAlive(row, col) && !(liveNeighbours(row, col) == 2 || liveNeighbours(row, col) == 3)) {
@@ -191,30 +217,32 @@ void GameOfLife::compute() {
 				} else if (!wasAlive(row, col) && liveNeighbours(row, col) == 3) {
 					this->currentState[row][col] = true;
 				}
-
+				still |= this->currentState[row][col];
 			}
 		}
 
 		showState();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		if (t < 9) {
-			clearScreen();
-		}
-
-		for (int i = 0; i < rows; i++) { //copy to the previous state
-			for (int j = 0; j < cols; j++) {
-				this->previousState[i][j] = isAlive(i, j);
+		if (still) { // the cellular automaton is not a still life
+			for (int i = 0; i < rows; i++) { //copy to the previous state
+				for (int j = 0; j < cols; j++) {
+					this->previousState[i][j] = isAlive(i, j);
+				}
 			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(timeDelay));
+			clearScreen();
+			still = false;
+		} else { // the cellular automaton is a still life, so the simulation reaches its end
+			still = true;
 		}
+		std::cout << "simulation #" << t << "\n\r";
 	}
-
 }
 
 /**
  * clears terminal window
  */
 void GameOfLife::clearScreen() {
-	cout << "\033[H\033[J";
+	std::cout << "\033[H\033[J";
 }
 
 

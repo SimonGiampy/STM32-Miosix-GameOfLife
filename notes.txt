@@ -1,13 +1,4 @@
 
-Input peripherals:
-
-- analyzing mouse input requires the library linux/input.h, which apparently it is not included under the miosix kernel
--       it can be achieved on the standard linux terminal by using the script base_input_handler and following
-        the provided instructions at the start of the file.
--
-- analyzing the keyboard input can be done with the termios library, by using the provided code in the base_input_handler file
-
-
 Programs Structure:
 
 -   base_input_handler.cpp contains the default implementation of the user input handler, provided on stack overflow, written in C
@@ -32,9 +23,15 @@ struct pollfd {
 };
 
 
-linux/input.h
-provides basic functionality for analyzing the mouse input, although it is not currently possible to find the exact
-coordinates where the user clicked on the screen. Neither it is possible to know if the click occurred inside the terminal
+Future features to be implemented in the project:
 
+- spawn different spaceships and gliders on the matrix (spawn with g (glider), s (spaceship), S (bigger spaceship))
+- add command to terminate the simulation execution (quit with q)
+- add command to speed up or down the simulation speed (toggle speed with f)
+- add command to pause and resume the simulation (start and stop with s)
+- add tutorial prompt at the start of the program, containing information like terminal size and available commands
+- allow the user to resize the terminal and then start the initialization of the matrix
 
+- create a better readme file and clean up the repository
+- add report and presentation folders, as well as the link to the miosix repository
 

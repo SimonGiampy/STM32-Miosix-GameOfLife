@@ -6,13 +6,14 @@
 #include <thread>
 #include <random>
 
-#define living '█'
+#define living "█"
 
 class GameOfLife {
 private:
 	int rows, cols;
     bool **currentState;
     bool **previousState;
+	int timeDelay = 100;
 
 public:
     GameOfLife(int rows, int cols);
@@ -31,6 +32,8 @@ public:
 	void randomInitialization();
 
 	static void clearScreen();
+
+	void spawnSpaceship(int x, int y);
 };
 
 

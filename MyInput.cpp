@@ -26,27 +26,37 @@ void MyInput::initialConfiguration() {
 		input = userInput();
 		switch (input) {
 			case 'c': {
-				game.changeCellState(cursorX - 1, cursorY - 1);
-				setCursorPosition(cursorX, cursorY);
-				std::cout.flush();
+				game.changeCellState(cursorCol - 1, cursorRow - 1);
+				setCursorPosition(cursorCol, cursorRow);
 			} break;
 			case 'e': {
-				game.compute(); //start simulation
 				done = true;
 			} break;
-			case 'u': case 'd': case 'l': case 'r': {
+			case 'a': {
 
 			} break;
-			default: { // quit signal
-				done = true;
+			case 'g': {
+				if (cursorRow <= height - 6 && cursorCol <= width - 11)
+					game.spawnGlider(cursorCol - 1, cursorRow - 1);
+				moveCursor(0, 0);
+			} break;
+			case 's': {
+				if (cursorRow <= height - 9 && cursorCol <= width - 16)
+					game.spawnSpaceship(cursorCol - 1, cursorRow - 1);
+				moveCursor(0, 0);
+			} break;
+			case 'q': { //quits the game
+				resetTerminal();
+				return;
 			}
+			default: {}
 		}
 	}
 
-	//game.compute();
-
+	game.compute(); //start simulation
 	// reset terminal config before quitting the simulation
 	resetTerminal();
+	std::cout << "simulation ended.\n";
 }
 
 int MyInput::setUpTerminal() {
@@ -102,40 +112,39 @@ char MyInput::userInput() {
 				done = true;
 				switch (keys[2]) {
 					case 65: { // up
-						moveCursor(0, -2);
-						typed = 'u';
+						if (cursorRow > 2) moveCursor(0, -2);
 					} break;
 					case 66: { // down
-						moveCursor(0, 2);
-						typed = 'd';
+						if (cursorRow < height - 3) moveCursor(0, 2);
 					} break;
 					case 67: { // right
-						moveCursor(3, 0);
-						typed = 'r';
+						if (cursorCol < width - 6) moveCursor(3, 0);
 					} break;
 					case 68: { // left
-						moveCursor(-3, 0);
-						typed = 'l';
+						if (cursorCol > 3) moveCursor(-3, 0);
 					} break;
 				}
+				typed = 'a'; // arrow
 			} else {
-				for (unsigned int i = 0; i < data; i++) {
+				for (int i = 0; i < data; i++) {
 					if (keys[i] == 'q' || keys[i] == 'Q') {
 						done = true; //closes the program
 						typed = 'q';
-					} else if (keys[i] == ' ') { //spacebar button confirms the positioning
+					} else if (keys[i] == ' ') { // spacebar button confirms the positioning
 						typed = 'c';
 						done = true;
-					} else if (keys[i] == 10) { // enter button starts the simulation
+					} else if (keys[i] == 10 || keys[i] == 13) { // enter button starts the simulation
+						//char 13 = carriage return on miosix; char 10 = new line on linux
 						typed = 'e';
+						done = true;
+					} else if (keys[i] == 'g' || keys[i] == 's' || keys[i] == 'S') {
+						typed = (char) keys[i];
 						done = true;
 					}
 					// add new conditions for more controls of the game simulation
-					std::cout << "Key " << keys[i] << " pressed\n\r";
+					//std::cout << "Key " << (int) keys[i] << " pressed\n\r";
 				}
 			}
-
-			std::cout.flush(); //flushes the output buffer on the console
 		}
 	}
 	return typed;
@@ -163,9 +172,10 @@ void MyInput::resetTerminal() {
  * @param y difference in the y direction of the terminal
  */
 void MyInput::moveCursor(int x, int y) {
-	cursorX += x;
-	cursorY += y;
-	std::cout << "\033[" << cursorY << ";" << cursorX << "f";
+	cursorCol += x;
+	cursorRow += y;
+	std::cout << "\033[" << cursorRow << ";" << cursorCol << "f";
+	std::cout.flush(); // flushes stdout so that the cursor position is updated
 }
 
 /**
@@ -175,6 +185,7 @@ void MyInput::moveCursor(int x, int y) {
  */
 void MyInput::setCursorPosition(int x, int y) {
 	std::cout << "\033[" << y << ";" << x << "f";
+	std::cout.flush();
 }
 
 /**
@@ -185,7 +196,7 @@ void MyInput::getTerminalSize() {
 	int j, pow;
 	char ch = 0;
 
-	int *y = new int, *x = new int;
+	int x = 0, y = 0;
 
 	std::cout << "\x1b[999;999H"; // moves the cursor to the extreme right and lower position on the terminal
 
@@ -201,18 +212,14 @@ void MyInput::getTerminalSize() {
 	}
 
 	for(j -= 2, pow = 1; buf[j] != ';'; j--, pow *= 10) {
-		*x = *x + (buf[j] - '0' ) * pow;
+		x = x + (buf[j] - '0' ) * pow;
 	}
-
 	for(j-- , pow = 1; buf[j] != '['; j--, pow *= 10) {
-		*y = *y + (buf[j] - '0') * pow;
+		y = y + (buf[j] - '0') * pow;
 	}
 
-	width = *x;
-	height = *y;
-	delete x;
-	delete y;
-
+	width = x;
+	height = y;
 	clearScreen();
 	std::cout.flush();
 }
