@@ -6,18 +6,14 @@
 #define STM32_MIOSIX_GAMEOFLIFE_EDITOR_H
 
 #include <unistd.h>
-#include <sys/types.h>
 #include <termios.h>
-#include <sys/wait.h>
-#include <sys/ioctl.h>
 #include <string>
-#include <fstream>
 #include <iostream>
-//#include "miosix/miosix.h" // for micro controller debugging only
+//#include "miosix/miosix.h" // needed dependencies for the Miosix OS
 
 #include "GameOfLife.h"
 
-class MyInput {
+class Terminal {
 
 private:
 	unsigned char keys[16]{};
@@ -25,6 +21,7 @@ private:
 	int fd = 0; // terminal file descriptor
 	int cursorCol = 1, cursorRow = 1; // cursor coordinates
 	int width = 0, height = 0; // terminal size
+	GameOfLife *game{};
 
 public:
 
@@ -34,9 +31,11 @@ public:
 	void getTerminalSize();
 
 	int setUpTerminal();
+	void setupSimulation();
+	void startingConfiguration();
 	void resetTerminal();
+
 	char userInput();
-	void initialConfiguration();
 };
 
 

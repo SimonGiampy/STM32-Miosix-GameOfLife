@@ -198,7 +198,13 @@ void GameOfLife::randomInitialization() {
 
 }
 
+/**
+ * shows the evolution in time of the cellular automaton
+ */
 void GameOfLife::compute() {
+
+	Controller controller;
+
 	clearScreen();
 
 	// initialization of the previous state matrix to be equal the previous one
@@ -208,8 +214,8 @@ void GameOfLife::compute() {
 		}
 	}
 
-	bool still = false;
-	for (int t = 0; !still; t++) {
+	bool still = false, exit = false; //empty life check mechanism
+	for (int t = 0; !still && !exit; t++) {
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < cols; col++) {
 				if (wasAlive(row, col) && !(liveNeighbours(row, col) == 2 || liveNeighbours(row, col) == 3)) {
@@ -221,20 +227,23 @@ void GameOfLife::compute() {
 			}
 		}
 
+		still = !still;
+		std::cout << "simulation #" << t << "\n\r";
 		showState();
-		if (still) { // the cellular automaton is not a still life
+		if (!still) { // the cellular automaton is not a still life
 			for (int i = 0; i < rows; i++) { //copy to the previous state
 				for (int j = 0; j < cols; j++) {
 					this->previousState[i][j] = isAlive(i, j);
 				}
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(timeDelay));
-			clearScreen();
-			still = false;
-		} else { // the cellular automaton is a still life, so the simulation reaches its end
-			still = true;
+
+			//std::this_thread::sleep_for(std::chrono::milliseconds(timeDelay));
+			exit = controller.inputManager();
+
+			//clearScreen();
+
 		}
-		std::cout << "simulation #" << t << "\n\r";
+		// if the cellular automaton is a still life, so the simulation reaches its end
 	}
 }
 

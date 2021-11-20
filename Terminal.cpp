@@ -2,11 +2,9 @@
 // Created by simon on 07/11/21.
 //
 
-#include "MyInput.h"
+#include "Terminal.h"
 
-void MyInput::initialConfiguration() {
-	//TODO: prompt tutorial for the usage of the game
-
+void Terminal::setupSimulation() {
 	int success = setUpTerminal();
 	if (success != 0) return; // failed to set up terminal parameters
 
@@ -14,52 +12,55 @@ void MyInput::initialConfiguration() {
 	//std::cout << "terminal width = " << width << ", height = " << height << ".\n\r";
 
 	int rows = height / 2 - 1, cols = width / 3 - 1;
-	GameOfLife game(rows, cols);
+	game = new GameOfLife(rows, cols);
 
-	game.showState();
+	game->showState();
 	moveCursor(1, 1); // moving to the cell 0,0 of the matrix
 	std::cout.flush();
 
+	startingConfiguration(); // asks the user to place the living cells
+
+	game->compute(); //start simulation
+
+	// reset terminal config before quitting the program
+	resetTerminal();
+	delete game;
+	std::cout << "simulation ended.\n";
+}
+
+void Terminal::startingConfiguration() {
 	bool done = false;
 	char input;
 	while (!done) {
 		input = userInput();
 		switch (input) {
-			case 'c': {
-				game.changeCellState(cursorCol - 1, cursorRow - 1);
+			case 'c': { // space bar confirms the cell life positioning
+				game->changeCellState(cursorCol - 1, cursorRow - 1);
 				setCursorPosition(cursorCol, cursorRow);
 			} break;
-			case 'e': {
+			case 'e': { // enter command to start the simulation
 				done = true;
 			} break;
-			case 'a': {
-
-			} break;
-			case 'g': {
+			case 'g': { // spawn a glider
 				if (cursorRow <= height - 6 && cursorCol <= width - 11)
-					game.spawnGlider(cursorCol - 1, cursorRow - 1);
+					game->spawnGlider(cursorCol - 1, cursorRow - 1);
 				moveCursor(0, 0);
 			} break;
-			case 's': {
+			case 's': { // spawn a mid - size spaceship
 				if (cursorRow <= height - 9 && cursorCol <= width - 16)
-					game.spawnSpaceship(cursorCol - 1, cursorRow - 1);
+					game->spawnSpaceship(cursorCol - 1, cursorRow - 1);
 				moveCursor(0, 0);
 			} break;
-			case 'q': { //quits the game
+			case 'q': { // quits the game
 				resetTerminal();
 				return;
 			}
 			default: {}
 		}
 	}
-
-	game.compute(); //start simulation
-	// reset terminal config before quitting the simulation
-	resetTerminal();
-	std::cout << "simulation ended.\n";
 }
 
-int MyInput::setUpTerminal() {
+int Terminal::setUpTerminal() {
 	clearScreen();
 
 	if (!isatty(STDIN_FILENO)) { //checks whether the file descriptor refers to a terminal
@@ -94,17 +95,16 @@ int MyInput::setUpTerminal() {
 
 	fd = STDIN_FILENO;
 
-	//std::cout << "Ready. Press Q to exit.\n\r";
 	std::cout.flush();
 
 	return 0;
 }
 
-char MyInput::userInput() {
+char Terminal::userInput() {
 	bool done = false;
 	char typed = 0;
 
-	while (!done) { // until the user doesn't terminate the program
+	while (!done) { // until the user doesn't send a valid input key
 
 		ssize_t data = read(fd, keys, sizeof keys);
 		if (data > 0) {
@@ -151,16 +151,16 @@ char MyInput::userInput() {
 }
 
 /**
- * clears terminal
+ * clears terminal content
  */
-void MyInput::clearScreen() {
+void Terminal::clearScreen() {
 	std::cout << "\033[H\033[J";
 }
 
 /**
  * resets the previous configuration of the termios data structure
  */
-void MyInput::resetTerminal() {
+void Terminal::resetTerminal() {
 	/* Restore terminal settings after terminating the execution */
 	tcsetattr(fd, TCSAFLUSH, &oldConfig);
 	std::cout << "All done\n\r" << std::endl;
@@ -171,7 +171,7 @@ void MyInput::resetTerminal() {
  * @param x difference in the x direction of the terminal
  * @param y difference in the y direction of the terminal
  */
-void MyInput::moveCursor(int x, int y) {
+void Terminal::moveCursor(int x, int y) {
 	cursorCol += x;
 	cursorRow += y;
 	std::cout << "\033[" << cursorRow << ";" << cursorCol << "f";
@@ -183,7 +183,7 @@ void MyInput::moveCursor(int x, int y) {
  * @param x absolute x coordinate
  * @param y absolute y coordinate
  */
-void MyInput::setCursorPosition(int x, int y) {
+void Terminal::setCursorPosition(int x, int y) {
 	std::cout << "\033[" << y << ";" << x << "f";
 	std::cout.flush();
 }
@@ -191,7 +191,7 @@ void MyInput::setCursorPosition(int x, int y) {
 /**
  * retrieves the size of the terminal (width and height) via writing to the terminal buffer and reading its response
  */
-void MyInput::getTerminalSize() {
+void Terminal::getTerminalSize() {
 	char buf[30] = {0};
 	int j, pow;
 	char ch = 0;
