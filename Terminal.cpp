@@ -5,11 +5,8 @@
 #include "Terminal.h"
 
 void Terminal::setupSimulation() {
-	int success = setUpTerminal();
-	if (success != 0) return; // failed to set up terminal parameters
 
 	getTerminalSize();
-	//std::cout << "terminal width = " << width << ", height = " << height << ".\n\r";
 
 	int rows = height / 2 - 1, cols = width / 3 - 1;
 	game = new GameOfLife(rows, cols);
@@ -18,17 +15,19 @@ void Terminal::setupSimulation() {
 	moveCursor(1, 1); // moving to the cell 0,0 of the matrix
 	std::cout.flush();
 
-	startingConfiguration(); // asks the user to place the living cells
+	bool quit = startingConfiguration(); // asks the user to place the living cells
 
-	game->compute(); //start simulation
+	if (!quit) {
+		game->compute(); //start simulation
+	}
 
 	// reset terminal config before quitting the program
 	resetTerminal();
 	delete game;
-	std::cout << "simulation ended.\n";
+	std::cout << "simulation ended.\n\r";
 }
 
-void Terminal::startingConfiguration() {
+bool Terminal::startingConfiguration() {
 	bool done = false;
 	char input;
 	while (!done) {
@@ -41,27 +40,28 @@ void Terminal::startingConfiguration() {
 			case 'e': { // enter command to start the simulation
 				done = true;
 			} break;
-			case 'g': { // spawn a glider
+			case 'g': case 'G': { // spawn a glider
 				if (cursorRow <= height - 6 && cursorCol <= width - 11)
 					game->spawnGlider(cursorCol - 1, cursorRow - 1);
 				moveCursor(0, 0);
 			} break;
-			case 's': { // spawn a mid - size spaceship
+			case 's': case 'S': { // spawns a mid - size spaceship
 				if (cursorRow <= height - 9 && cursorCol <= width - 16)
 					game->spawnSpaceship(cursorCol - 1, cursorRow - 1);
 				moveCursor(0, 0);
 			} break;
 			case 'q': { // quits the game
 				resetTerminal();
-				return;
+				return true;
 			}
 			default: {}
 		}
 	}
+	return false;
 }
 
 int Terminal::setUpTerminal() {
-	clearScreen();
+	//clearScreen();
 
 	if (!isatty(STDIN_FILENO)) { //checks whether the file descriptor refers to a terminal
 		std::cerr << "Standard input is not a terminal.\n";
@@ -84,7 +84,7 @@ int Terminal::setUpTerminal() {
 	//config.c_oflag |= ONLCR;
 
 	config.c_cc[VMIN] = 0; //minimum number of characters for canonical read
-	config.c_cc[VTIME] = 0; //timeout for non canonical read
+	config.c_cc[VTIME] = 1; //timeout for non-canonical read = 100ms
 
 	// if the custom settings for the terminal cannot be set, it resets the default configuration saver previously
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &config) == -1) {
@@ -137,12 +137,10 @@ char Terminal::userInput() {
 						//char 13 = carriage return on miosix; char 10 = new line on linux
 						typed = 'e';
 						done = true;
-					} else if (keys[i] == 'g' || keys[i] == 's' || keys[i] == 'S') {
+					} else if (keys[i] == 'g' || keys[i] == 'G' || keys[i] == 's' || keys[i] == 'S') {
 						typed = (char) keys[i];
 						done = true;
 					}
-					// add new conditions for more controls of the game simulation
-					//std::cout << "Key " << (int) keys[i] << " pressed\n\r";
 				}
 			}
 		}

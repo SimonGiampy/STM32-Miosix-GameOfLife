@@ -32,7 +32,7 @@ public:
 
 	int setUpTerminal();
 	void setupSimulation();
-	void startingConfiguration();
+	bool startingConfiguration();
 	void resetTerminal();
 
 	char userInput();

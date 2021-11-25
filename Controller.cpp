@@ -7,34 +7,26 @@
 //for reference:
 // https://stackoverflow.com/questions/4792449/c0x-has-no-semaphores-how-to-synchronize-threads
 
-Controller::Controller() = default;
-
-/* Semaphore Implementation using condition variables and mutexes */
-/*
-void Controller::acquire() {
-	std::unique_lock<std::mutex> lock(mutex);
-	while (count == 0) {
-		condition.wait(lock);
-	}
-	count--;
+Controller::Controller() {
+	timeDelayIndex = 5;
 }
 
-void Controller::release() {
-	std::unique_lock<std::mutex> lock(mutex);
-	count++;
-	condition.notify_all();
+Controller::~Controller() {
+	if (reader.joinable()) reader.join(); // joins reader thread when the program finishes its execution
 }
-*/
 
-/* Synchronized Queue, using LIFO policy */
+/* Synchronized Queue, using FIFO policy */
 
+/**
+ * returns element at the tail of the queue. Must be called when the queue is not empty
+ * @return char at the back of the queue
+ */
 char Controller::get() {
 	std::unique_lock<std::mutex> lock(mutex);
 	while(actionsQueue.empty()) {
 		condition.wait(lock);
 	}
-	char result = actionsQueue.front();
-	//actionsQueue.pop_front();
+	char result = actionsQueue.back();
 	return result;
 }
 
@@ -60,28 +52,40 @@ bool Controller::hasSleeped() {
 bool Controller::inputManager() {
 
 	// the main thread starts both threads and then waiting for the sequence to terminate
-	std::thread sleeper(&Controller::sleepingThread, this, 200);
-	std::thread reader(&Controller::readerThread, this);
+	//std::thread sleeper(&Controller::sleepingThread, this, 100);
+	bool stopped = false;
+	for (int i = 0; (i < timeDelays[timeDelayIndex] || stopped) && !terminate; i += 25) { //updates every 25 ms
 
-	std::unique_lock<std::mutex> lock(mutex);
-	while (true) {
-		readyInput.wait(lock);
-		lock.unlock();
-		if (this->hasSleeped()) { // quit signal should break out the cycle and terminate even if the timer didn't expire
-			break;
-		} else if (this->get() == 'q') {
-			lock.lock();
-			terminate = true;
-			readySleep.notify_one();
-			lock.unlock();
-			break;
+		// here check for the time delay command change
+
+		// analyze the queue from the head to the tail to analyze the commands
+		while (!actionsQueue.empty()) {
+			if (this->get() == 's') {
+				stopped = true;
+				actionsQueue.pop_back();
+				std::cout << "stopped\n";
+			} else if (this->get() == 'r') {
+				stopped = false;
+				actionsQueue.pop_back();
+				std::cout << "resumed\n";
+			} else if (this->get() == 'f') {
+				timeDelayIndex = (timeDelayIndex + 1) % 7;
+				actionsQueue.pop_back();
+			}
+
+			if (!actionsQueue.empty() && this->get() == 'q') { // quit signal should break out the cycle and terminate even if the timer didn't expire
+				//std::unique_lock<std::mutex> lock(mutex);
+				terminate = true;
+				std::cout << "terminate\n";
+				break;
+			}
 		}
-		lock.lock();
-	}
-	sleeper.join();
-	if (reader.joinable()) reader.join();
 
-	actionsQueue.clear(); // clears the keys queue before the new iteration
+		std::this_thread::sleep_for(std::chrono::milliseconds (25));
+	}
+
+	//actionsQueue.clear(); // clears the keys queue before the new iteration
+	if (terminate) reader.join();
 	return terminate;
 }
 
@@ -126,38 +130,29 @@ bool Controller::isTerminating() const {
 	return terminate;
 }
 
+void Controller::startReader() {
+	reader = std::thread(&Controller::readerThread, this);
+	//reader.join();
+}
+
 /**
  * thread that reads user input commands during simulation
  */
 void Controller::readerThread() {
 	char input[4] = "";
-	while (input[0] != 'q' && !this->hasSleeped()) {
+	while (input[0] != 'q' && !terminate) {
 		// it should not wait for user input if the queue contains the end of sleep signal
 
 		ssize_t data = read(STDIN_FILENO, input, sizeof input);
-
-		if (data > 0 ) {
-			//std::cout << "data read = " << input << ".\n";
-			if (input[0] == 's' || input[0] == 'q') {
-
+		if (data > 0) {
+			if (input[0] == 's' || input[0] == 'r' || input[0] == 'q' || input[0] == 'f') {
 				this->put(input[0]);
-				readyInput.notify_one();
-
-				if (input[0] == 's') {
-					char resume[4];
-					do {
-						ssize_t resuming = read(STDIN_FILENO, resume, sizeof resume);
-						if (resuming > 0) {
-							if (resume[0] == 'r') { // resume input command
-								this->put(resume[0]);
-								readyInput.notify_one();
-							}
-						}
-					} while (resume[0] != 'r');
-				}
 			}
 		}
-
-
 	}
+	// reader thread stops when reads the exit command
+}
+
+void Controller::setTermination() {
+	terminate = true;
 }

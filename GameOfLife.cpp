@@ -204,6 +204,7 @@ void GameOfLife::randomInitialization() {
 void GameOfLife::compute() {
 
 	Controller controller;
+	controller.startReader();
 
 	clearScreen();
 
@@ -228,7 +229,7 @@ void GameOfLife::compute() {
 		}
 
 		still = !still;
-		std::cout << "simulation #" << t << "\n\r";
+		//std::cout << "simulation #" << t << "\n\r";
 		showState();
 		if (!still) { // the cellular automaton is not a still life
 			for (int i = 0; i < rows; i++) { //copy to the previous state
@@ -236,12 +237,11 @@ void GameOfLife::compute() {
 					this->previousState[i][j] = isAlive(i, j);
 				}
 			}
-
-			//std::this_thread::sleep_for(std::chrono::milliseconds(timeDelay));
 			exit = controller.inputManager();
 
-			//clearScreen();
-
+			if (!exit) clearScreen();
+		} else {
+			controller.setTermination();
 		}
 		// if the cellular automaton is a still life, so the simulation reaches its end
 	}

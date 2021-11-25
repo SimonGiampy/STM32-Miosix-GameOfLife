@@ -21,19 +21,20 @@ private:
 	std::condition_variable condition;
 
 	// synchronized queue
-	std::condition_variable readyInput, readySleep;
+	std::condition_variable readyInput;
 	std::mutex mutex;
 	std::list<char> actionsQueue;
 
 	bool terminate = false; // simulation termination check
+	int timeDelayIndex; // expressed in milliseconds
+	const int timeDelays[7] = {50, 100, 250, 500, 750, 1000, 2000};
+
+	std::thread reader;
 
 
 public:
 	Controller();
-
-	// semaphore code
-	//void acquire();
-	//void release();
+	~Controller();
 
 	// synchronized queue code
 	void put(char action);
@@ -46,6 +47,9 @@ public:
 	void sleepingThread(int millis);
 	void readerThread();
 	bool isTerminating() const;
+	void setTermination();
+
+	void startReader();
 };
 
 

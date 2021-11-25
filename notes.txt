@@ -1,26 +1,9 @@
 
-Programs Structure:
-
--   base_input_handler.cpp contains the default implementation of the user input handler, provided on stack overflow, written in C
--   input_handler.cpp is a C++ implementation of the same default file provided on stackoverflow
--   MyInput.cpp is a custom keyboard-only user input handler source file, that can be executed via the starter.cpp source file.
-            it does not use the poll.h file, nor the input.h file. Handles user input without polling but directly reading the stdin
-
 Carriage Return problem:
 - it can be solved by adding \r next to the \n on the std cout calls
 - the oflag is the one responsible for the output of the carriage return, but for some reason it doesn't work when the mode
         is set to be non-canonical
 
-
-
-sys/poll.h
-contains the following data structure used for recording events derived from external peripherals
-
-struct pollfd {
-    int fd;			/* File descriptor to poll.  */
-    short int events;		/* Types of events poller cares about.  */
-    short int revents;		/* Types of events that actually occurred.  */
-};
 
 
 Future features to be implemented in the project:
