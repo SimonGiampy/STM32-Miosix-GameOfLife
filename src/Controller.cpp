@@ -2,7 +2,7 @@
 // Created by simon on 17/11/21.
 //
 
-#include "Controller.h"
+#include "includes/Controller.h"
 
 /**
  * constructor initializes the delay between frames to 1000ms

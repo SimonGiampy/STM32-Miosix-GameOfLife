@@ -8,4 +8,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 include_directories(.)
 
 add_executable(STM32_Miosix_GameOfLife
-        starter.cpp Terminal.cpp GameOfLife.cpp Controller.cpp Prompt.cpp)
+        main.cpp src/Terminal.cpp src/GameOfLife.cpp src/Controller.cpp src/Prompt.cpp)

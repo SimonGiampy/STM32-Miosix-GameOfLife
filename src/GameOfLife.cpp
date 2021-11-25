@@ -1,4 +1,4 @@
-#include "GameOfLife.h"
+#include "includes/GameOfLife.h"
 
 /**
 The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells,

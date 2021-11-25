@@ -2,7 +2,7 @@
 // Created by simon on 19/11/21.
 //
 
-#include "Prompt.h"
+#include "includes/Prompt.h"
 
 void Prompt::printLogo() {
 	std::cout << "\n\r"

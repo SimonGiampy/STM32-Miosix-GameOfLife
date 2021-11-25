@@ -2,8 +2,8 @@
 // Created by simon on 08/11/21.
 //
 
-#include "Terminal.h"
-#include "Prompt.h"
+#include "includes/Terminal.h"
+#include "includes/Prompt.h"
 
 int main() {
 

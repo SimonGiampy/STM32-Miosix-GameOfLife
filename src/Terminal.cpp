@@ -2,7 +2,7 @@
 // Created by simon on 07/11/21.
 //
 
-#include "Terminal.h"
+#include "includes/Terminal.h"
 
 /**
  * Main thread for the program execution.
