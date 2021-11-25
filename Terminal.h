@@ -9,16 +9,14 @@
 #include <termios.h>
 #include <string>
 #include <iostream>
-//#include "miosix/miosix.h" // needed dependencies for the Miosix OS
 
 #include "GameOfLife.h"
 
 class Terminal {
 
 private:
-	unsigned char keys[16]{};
 	struct termios config{}, oldConfig{}; //terminal configurations
-	int fd = 0; // terminal file descriptor
+	const int fd = STDIN_FILENO; // terminal file descriptor
 	int cursorCol = 1, cursorRow = 1; // cursor coordinates
 	int width = 0, height = 0; // terminal size
 	GameOfLife *game{};

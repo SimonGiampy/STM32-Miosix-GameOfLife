@@ -7,34 +7,33 @@
 #include <random>
 #include "Controller.h"
 
-#define living "█"
+#define living "█" // living cell character representation
 
 class GameOfLife {
 private:
-	int rows, cols;
-    bool **currentState;
-    bool **previousState;
-	int timeDelay = 100;
+	int rows, cols; // size of the cellular automaton
+    bool **currentState; // current state of the cellular automaton
+    bool **previousState; // previous state of the cellular automaton
 
 public:
     GameOfLife(int rows, int cols);
 	~GameOfLife();
-
 
     int liveNeighbours(int x, int y);
     bool wasAlive (int x, int y);
     bool isAlive (int x, int y);
 	void changeCellState(int x, int y);
 
-    void showState();
-	void compute();
+    void showState(); // prints the matrix
+	void compute(); // actual code for the simulation
 
 	void spawnGlider(int x, int y);
-	void randomInitialization();
+	void spawnSpaceship(int x, int y);
+	void randomInitialization(); //unused function because it can be used only for testing
 
 	static void clearScreen();
 
-	void spawnSpaceship(int x, int y);
+
 };
 
 

@@ -4,6 +4,13 @@
 
 #include "Terminal.h"
 
+/**
+ * Main thread for the program execution.
+ * First creates the matrices for the game based on the terminal size.
+ * Then lets the user configure the cellular automaton.
+ * After the user confirms the configuration, the simulation starts.
+ * At the end the terminal configuration is reset
+ */
 void Terminal::setupSimulation() {
 
 	getTerminalSize();
@@ -24,9 +31,13 @@ void Terminal::setupSimulation() {
 	// reset terminal config before quitting the program
 	resetTerminal();
 	delete game;
-	std::cout << "simulation ended.\n\r";
+	std::cout << "Simulation ended.\n\r";
 }
 
+/**
+ * lets the user decide which cells to activate, and move between the cells
+ * @return true if the user quits the program before finishing the set up
+ */
 bool Terminal::startingConfiguration() {
 	bool done = false;
 	char input;
@@ -60,17 +71,20 @@ bool Terminal::startingConfiguration() {
 	return false;
 }
 
+/**
+ * changes the terminal configuration, setting it to non-canonical (raw) mode
+ * @return 1 if the terminal parameters weren't changed due to some error, 0 otherwise
+ */
 int Terminal::setUpTerminal() {
-	//clearScreen();
 
 	if (!isatty(STDIN_FILENO)) { //checks whether the file descriptor refers to a terminal
-		std::cerr << "Standard input is not a terminal.\n";
+		std::cerr << "Standard input is not a terminal.\n\r";
 		return 1; // failure
 	}
 
 	/* Save old terminal configuration. */
 	if (tcgetattr(STDIN_FILENO, &oldConfig) == -1 || tcgetattr(STDIN_FILENO, &config) == -1) {
-		std::cerr << "Cannot get terminal settings: %s.\n";
+		std::cerr << "Cannot get terminal settings: %s.\n\r";
 		return 1; // failure
 	}
 
@@ -89,21 +103,23 @@ int Terminal::setUpTerminal() {
 	// if the custom settings for the terminal cannot be set, it resets the default configuration saver previously
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &config) == -1) {
 		tcsetattr(STDIN_FILENO, TCSANOW, &oldConfig);
-		std::cerr << "Cannot set terminal settings: %s.\n";
+		std::cerr << "Cannot set terminal settings: %s.\n\r";
 		return 1; // failure
 	}
-
-	fd = STDIN_FILENO;
 
 	std::cout.flush();
 
 	return 0;
 }
 
+/**
+ * reads and analyzes user input characters
+ * @return the input char for setting up the simulation (excluding the directional arrows)
+ */
 char Terminal::userInput() {
 	bool done = false;
 	char typed = 0;
-
+	unsigned char keys[16]{};
 	while (!done) { // until the user doesn't send a valid input key
 
 		ssize_t data = read(fd, keys, sizeof keys);
@@ -159,9 +175,9 @@ void Terminal::clearScreen() {
  * resets the previous configuration of the termios data structure
  */
 void Terminal::resetTerminal() {
-	/* Restore terminal settings after terminating the execution */
+	// Restore terminal settings after terminating the execution
 	tcsetattr(fd, TCSAFLUSH, &oldConfig);
-	std::cout << "All done\n\r" << std::endl;
+	std::cout << "All done\n\r";
 }
 
 /**

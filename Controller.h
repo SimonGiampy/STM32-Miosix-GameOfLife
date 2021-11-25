@@ -17,20 +17,17 @@ class Controller {
 
 private:
 
-	// semaphore code
-	std::condition_variable condition;
-
-	// synchronized queue
-	std::condition_variable readyInput;
+	// synchronized queue with FIFO policy
+	std::condition_variable listCondition;
 	std::mutex mutex;
 	std::list<char> actionsQueue;
 
 	bool terminate = false; // simulation termination check
 	int timeDelayIndex; // expressed in milliseconds
+	// iterate over this array that represents the delay times in milliseconds
 	const int timeDelays[7] = {50, 100, 250, 500, 750, 1000, 2000};
 
-	std::thread reader;
-
+	std::thread reader; // reads user input asynchronously
 
 public:
 	Controller();
@@ -39,19 +36,13 @@ public:
 	// synchronized queue code
 	void put(char action);
 	char get();
-	bool hasSleeped();
-	void putToSleep();
 
 	// concurrency management
 	bool inputManager(); // returns true if the user wishes to terminate the simulation
-	void sleepingThread(int millis);
-	void readerThread();
-	bool isTerminating() const;
-	void setTermination();
-
 	void startReader();
+	void readerThread(); // thread that reads user input
+	void setTermination(); // sets termination flag
+
 };
-
-
 
 #endif //STM32_MIOSIX_GAMEOFLIFE_CONTROLLER_H

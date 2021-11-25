@@ -17,6 +17,11 @@ Any dead cell with three live neighbours becomes a live cell.
 All other live cells die in the next generation. Similarly, all other dead cells stay dead.
  */
 
+/**
+ * constructs the cellular automaton given the number of rows and columns
+ * @param rows number of rows
+ * @param cols number of columns
+ */
 GameOfLife::GameOfLife(int rows, int cols) {
 	this->rows = rows;
 	this->cols = cols;
@@ -41,7 +46,7 @@ GameOfLife::GameOfLife(int rows, int cols) {
 }
 
 /**
- * destructor deallocates the dynamically allocated matrix of the game representation
+ * destructor deallocates the dynamically allocated the matrices of the game representation
  */
 GameOfLife::~GameOfLife() {
 	delete[] currentState[0];
@@ -50,14 +55,31 @@ GameOfLife::~GameOfLife() {
 	delete[] previousState;
 }
 
-
+/**
+ * checks if a certain cell is alive in the previous state
+ * @param x matrix coordinate
+ * @param y matrix coordinate
+ * @return true if it lived
+ */
 bool GameOfLife::wasAlive(int x, int y) {
 	return this->previousState[x][y];
 }
+
+/**
+ * checks if a certain cell is alive in the current state
+ * @param x matrix coordinate
+ * @param y matrix coordinate
+ * @return true if it lives
+ */
 bool GameOfLife::isAlive(int x, int y) {
 	return this->currentState[x][y];
 }
 
+/**
+ * switches the cell status: if it was dead, now it lives, and vice versa
+ * @param x coordinate of the cursor column position
+ * @param y coordinate of the cursor row position
+ */
 void GameOfLife::changeCellState(int x, int y) {
 	currentState[y/2][x/3] = !currentState[y/2][x/3];
 	clearScreen();
@@ -73,11 +95,11 @@ void GameOfLife::showState() {
 		for (int i = -1; i < cols * 3; i++) {
 
 			if (j == -1 || j % 2 == 1) {
-				matrix.append("-");
+				matrix.append("-"); // horizontal dividers
 			} else {
-				if (i == -1 || i % 3 == 2) matrix.append("|");
-				else if (this->currentState[j/2][i/3]) matrix.append(living);
-				else matrix.append(" ");
+				if (i == -1 || i % 3 == 2) matrix.append("|"); // vertical cell dividers
+				else if (this->currentState[j/2][i/3]) matrix.append(living); // living cells
+				else matrix.append(" "); //empty cells
 			}
 		}
 		matrix.append("\n\r");
@@ -150,6 +172,11 @@ void GameOfLife::spawnGlider(int x, int y) {
 	showState();
 }
 
+/**
+ * spaws a mid-size spaceship in the cellular automaton at the requested coordinates
+ * @param x coordinate of the column of the cursor position
+ * @param y coordinate of the row of the cursor position
+ */
 void GameOfLife::spawnSpaceship(int x, int y) {
 	int temp = x;
 	x = y/2;
@@ -170,8 +197,8 @@ void GameOfLife::spawnSpaceship(int x, int y) {
 }
 
 /**
- * it only works on linux, this random function is not present on miosix.
- * use this function for testing purpose only
+ * this function only works on linux, because this random function is not present on miosix.
+ * Use this function for testing purpose only (instead of manually input every living cell)
  */
 void GameOfLife::randomInitialization() {
 	int x, y;
@@ -199,7 +226,7 @@ void GameOfLife::randomInitialization() {
 }
 
 /**
- * shows the evolution in time of the cellular automaton
+ * shows the evolution in time of the cellular automaton. Main thread of the program
  */
 void GameOfLife::compute() {
 
@@ -216,9 +243,10 @@ void GameOfLife::compute() {
 	}
 
 	bool still = false, exit = false; //empty life check mechanism
-	for (int t = 0; !still && !exit; t++) {
+	for (int t = 0; !still && !exit; t++) { // iteration over time
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < cols; col++) {
+				//checks for the evolution of the cellular automaton
 				if (wasAlive(row, col) && !(liveNeighbours(row, col) == 2 || liveNeighbours(row, col) == 3)) {
 					this->currentState[row][col] = false;
 				} else if (!wasAlive(row, col) && liveNeighbours(row, col) == 3) {
@@ -241,7 +269,7 @@ void GameOfLife::compute() {
 
 			if (!exit) clearScreen();
 		} else {
-			controller.setTermination();
+			controller.setTermination(); // empty life leads to the automatic termination of the program
 		}
 		// if the cellular automaton is a still life, so the simulation reaches its end
 	}
