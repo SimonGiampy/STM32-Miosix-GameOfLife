@@ -8,6 +8,8 @@
 # Executables
 *.exe
 *.out
+
 /cmake-build-debug/
 /.idea
 .gitignore
+/latex-template/

@@ -242,24 +242,29 @@ void GameOfLife::compute() {
 		}
 	}
 
-	bool still = false, exit = false; //empty life check mechanism
-	for (int t = 0; !still && !exit; t++) { // iteration over time
+	bool still = false, empty = false, exit = false; //empty and still life check mechanisms
+	for (int t = 0; !empty && !still && !exit; t++) { // iteration over time
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < cols; col++) {
 				//checks for the evolution of the cellular automaton
+				// if the cellular automaton evolves in the next time step, it is not a still life
+				// if the cellular automaton is completely empty with no living cells, it is an empty life
 				if (wasAlive(row, col) && !(liveNeighbours(row, col) == 2 || liveNeighbours(row, col) == 3)) {
 					this->currentState[row][col] = false;
+					still = true;
 				} else if (!wasAlive(row, col) && liveNeighbours(row, col) == 3) {
 					this->currentState[row][col] = true;
+					still = true;
 				}
-				still |= this->currentState[row][col];
+				empty |= this->currentState[row][col];
 			}
 		}
 
+		empty = !empty;
 		still = !still;
 		//std::cout << "simulation #" << t << "\n\r";
 		showState();
-		if (!still) { // the cellular automaton is not a still life
+		if (!still && !empty) { // the cellular automaton is not a still life
 			for (int i = 0; i < rows; i++) { //copy to the previous state
 				for (int j = 0; j < cols; j++) {
 					this->previousState[i][j] = isAlive(i, j);

@@ -63,3 +63,7 @@ This has been found to be the highest working baud rate for this stm32 nucleo bo
 ### Useful Documentation
 I have used also this [guide](https://en.wikibooks.org/wiki/Serial_Programming/termios) for the serial programming part.
 The terminal configuration is changed by using the library `termios.h`
+
+
+**Project Developer**: 
+_Simone Giampà_ (Me)
