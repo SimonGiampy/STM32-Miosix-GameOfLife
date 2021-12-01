@@ -44,6 +44,24 @@ void Controller::put(char action) {
 }
 
 /**
+ * checks whether the synchronized queue is empty
+ * @return true if it's empty
+ */
+bool Controller::isEmpty() {
+	std::unique_lock<std::mutex> lock(mutex);
+	return actionsQueue.empty();
+}
+
+/**
+ * removes the element in the back of the queue
+ */
+void Controller::removeBack() {
+	std::unique_lock<std::mutex> lock(mutex);
+	actionsQueue.pop_back();
+	lock.unlock();
+}
+
+/**
  * manages the user input while between a frame and the next one.
  * Wakes up every 25ms in order to check if the user sent some commands in input, and processes them.
  * @return true if the user stopped the execution of the simulation
@@ -56,20 +74,20 @@ bool Controller::inputManager() {
 	for (int i = 0; (i < timeDelays[timeDelayIndex] || stopped) && !terminate; i += 25) { //updates every 25 ms
 
 		// analyze the queue from the head to the tail to analyze the commands
-		while (!actionsQueue.empty()) {
+		while (!isEmpty()) {
 			if (this->get() == 's' || this->get() == 'S') { // stopped
 				stopped = true;
-				actionsQueue.pop_back(); // resumes
+				removeBack();
 			} else if (this->get() == 'r' || this->get() == 'R') {
 				stopped = false;
-				actionsQueue.pop_back();
+				removeBack();
 			} else if (this->get() == 'f' || this->get() == 'F') { // change simulation speed
 				timeDelayIndex = (timeDelayIndex + 1) % 7;
-				actionsQueue.pop_back();
+				removeBack();
 			}
 
 			// quit signal should break out the cycle and terminate even if the timer didn't expire
-			if (!actionsQueue.empty() && (this->get() == 'q' || this->get() == 'Q')) {
+			if (!isEmpty() && (this->get() == 'q' || this->get() == 'Q')) {
 				terminate = true;
 				break;
 			}

@@ -36,6 +36,8 @@ public:
 	// synchronized queue code
 	void put(char action);
 	char get();
+	bool isEmpty();
+	void removeBack();
 
 	// concurrency management
 	bool inputManager(); // returns true if the user wishes to terminate the simulation
